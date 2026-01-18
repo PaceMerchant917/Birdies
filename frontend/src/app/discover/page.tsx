@@ -98,16 +98,17 @@ export default function DiscoverPage() {
   const currentProfile = profiles[currentIndex];
 
   return (
-    <div className="mobile-container discover-page">
-      {/* Header */}
-      <header className="discover-header">
-        <div style={{ width: '40px' }}></div>
-        <h1>Discover</h1>
-        <div style={{ width: '40px' }}></div>
-      </header>
+    <div className="page-container">
+      <div className="content-rectangle discover-page">
+        {/* Header */}
+        <header className="discover-header">
+          <div style={{ width: '40px' }}></div>
+          <h1>Discover</h1>
+          <div style={{ width: '40px' }}></div>
+        </header>
 
-      {/* Main Discover Area */}
-      <main className="discover-content">
+        {/* Main Discover Area */}
+        <main className="discover-content">
         {loading ? (
           <div className="discover-placeholder">
             <div className="placeholder-icon">⏳</div>
@@ -263,24 +264,72 @@ export default function DiscoverPage() {
           <span className="nav-label">Profile</span>
         </Link>
       </nav>
+      </div>
 
       <style jsx>{`
+        .page-container {
+          min-height: 100vh;
+          background: #f8f9fa;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+
+        .content-rectangle {
+          width: 100%;
+          max-width: 480px;
+          min-height: 90vh;
+          background: white;
+          border-radius: 28px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .discover-page {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
         .discover-content {
           flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
+          padding: 16px;
           overflow: hidden;
+        }
+
+        .discover-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px 24px;
+          background: white;
+          border-bottom: 1px solid #f0f0f0;
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .discover-header h1 {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 700;
+          color: #1a1a1a;
+          letter-spacing: -0.3px;
         }
 
         .profile-card {
           width: 100%;
-          max-width: 400px;
-          height: 720px;
+          max-width: 420px;
+          height: 85vh;
+          max-height: 780px;
           background: white;
-          border-radius: 20px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -289,7 +338,7 @@ export default function DiscoverPage() {
 
         .profile-photo-section {
           width: 100%;
-          height: 480px;
+          height: 60%;
           background: #f0f0f0;
           position: relative;
           display: flex;
@@ -301,54 +350,57 @@ export default function DiscoverPage() {
           bottom: 0;
           left: 0;
           right: 0;
-          background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-          padding: 40px 20px 20px 20px;
+          background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+          padding: 60px 24px 24px 24px;
           color: white;
         }
 
         .profile-name-overlay h2 {
           margin: 0;
-          font-size: 32px;
-          font-weight: 700;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+          font-size: 36px;
+          font-weight: 800;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+          letter-spacing: -0.5px;
         }
 
         .profile-details-section {
-          padding: 24px 20px;
+          padding: 32px 24px;
           flex: 1;
-          background: #fafafa;
+          background: #ffffff;
+          border-top: 1px solid #f0f0f0;
           display: flex;
           flex-direction: column;
         }
 
         .profile-details-top {
           flex: 0 0 auto;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
 
         .profile-details-row {
           display: flex;
           align-items: center;
-          margin-bottom: 8px;
-          font-size: 14px;
-          color: #555;
+          margin-bottom: 12px;
+          font-size: 16px;
+          color: #333;
         }
 
         .profile-details-label {
           font-weight: 600;
-          margin-right: 8px;
-          color: #333;
+          margin-right: 12px;
+          color: #666;
+          min-width: 20px;
         }
 
         .profile-details-value {
-          color: #667eea;
+          color: #1a1a1a;
           font-weight: 500;
         }
 
         .profile-details-divider {
           height: 1px;
-          background: linear-gradient(90deg, transparent, #ddd, transparent);
-          margin: 16px 0;
+          background: #e8e8e8;
+          margin: 24px 0 20px 0;
         }
 
         .profile-bio-section {
@@ -360,14 +412,17 @@ export default function DiscoverPage() {
         .profile-bio-label {
           font-size: 14px;
           font-weight: 600;
-          color: #333;
-          margin-bottom: 8px;
+          color: #666;
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-size: 12px;
         }
 
         .profile-bio-text {
-          color: #555;
-          font-size: 15px;
-          line-height: 1.5;
+          color: #333;
+          font-size: 16px;
+          line-height: 1.6;
           flex: 1;
           overflow-y: auto;
         }
