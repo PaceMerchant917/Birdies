@@ -8,6 +8,7 @@
     "migrate": "tsx src/db/migrate.ts",
     "view-users": "tsx src/db/view-users.ts",
     "seed-profiles": "tsx src/db/seed-profiles.ts",
+    "seed-dev": "tsx src/db/seed-dev.ts",
     "remove-seed-profiles": "tsx src/db/remove-seed-profiles.ts"
   },
   "dependencies": {

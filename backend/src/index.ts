@@ -732,17 +732,175 @@ app.get('/api/matches', requireAuth, async (req: AuthRequest, res) => {
 // MESSAGING
 // ============================================
 
-app.get('/api/matches/:matchId/messages', (req, res) => {
-  const { matchId } = req.params;
-  // TODO: Get messages for match
-  notImplemented(res);
+app.get('/api/matches/:matchId/messages', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId!;
+    const { matchId } = req.params;
+
+    // Verify the match exists and user is part of it
+    const matchResult = await pool.query(
+      'SELECT user_a_id, user_b_id FROM matches WHERE id = $1',
+      [matchId]
+    );
+
+    if (matchResult.rows.length === 0) {
+      const error: ApiError = {
+        error: {
+          code: 'MATCH_NOT_FOUND',
+          message: 'Match not found',
+        },
+      };
+      return res.status(404).json(error);
+    }
+
+    const match = matchResult.rows[0];
+    if (match.user_a_id !== userId && match.user_b_id !== userId) {
+      const error: ApiError = {
+        error: {
+          code: 'FORBIDDEN',
+          message: 'You are not part of this match',
+        },
+      };
+      return res.status(403).json(error);
+    }
+
+    // Get all messages for this match, ordered by created_at ascending
+    const messagesResult = await pool.query(
+      `SELECT id, match_id, sender_id, body, created_at, read_at
+       FROM messages
+       WHERE match_id = $1
+       ORDER BY created_at ASC`,
+      [matchId]
+    );
+
+    const messages = messagesResult.rows.map((row) => ({
+      id: row.id,
+      matchId: row.match_id,
+      senderId: row.sender_id,
+      body: row.body,
+      createdAt: row.created_at,
+      readAt: row.read_at,
+    }));
+
+    const response: GetMessagesResponse = {
+      messages,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Get messages error:', error);
+    const apiError: ApiError = {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred fetching messages',
+      },
+    };
+    res.status(500).json(apiError);
+  }
 });
 
-app.post('/api/matches/:matchId/messages', (req, res) => {
-  const { matchId } = req.params;
-  const body: CreateMessageRequest = req.body;
-  // TODO: Send message in match
-  notImplemented(res);
+app.post('/api/matches/:matchId/messages', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId!;
+    const { matchId } = req.params;
+    const body: CreateMessageRequest = req.body;
+
+    // Validate message body
+    if (!body.body || typeof body.body !== 'string') {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_MESSAGE',
+          message: 'Message body is required',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    const trimmedBody = body.body.trim();
+    if (trimmedBody.length === 0) {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_MESSAGE',
+          message: 'Message body cannot be empty',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    if (trimmedBody.length > 2000) {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_MESSAGE',
+          message: 'Message body cannot exceed 2000 characters',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Verify the match exists and user is part of it
+    const matchResult = await pool.query(
+      'SELECT user_a_id, user_b_id FROM matches WHERE id = $1',
+      [matchId]
+    );
+
+    if (matchResult.rows.length === 0) {
+      const error: ApiError = {
+        error: {
+          code: 'MATCH_NOT_FOUND',
+          message: 'Match not found',
+        },
+      };
+      return res.status(404).json(error);
+    }
+
+    const match = matchResult.rows[0];
+    if (match.user_a_id !== userId && match.user_b_id !== userId) {
+      const error: ApiError = {
+        error: {
+          code: 'FORBIDDEN',
+          message: 'You are not part of this match',
+        },
+      };
+      return res.status(403).json(error);
+    }
+
+    // Insert the message
+    const messageResult = await pool.query(
+      `INSERT INTO messages (match_id, sender_id, body)
+       VALUES ($1, $2, $3)
+       RETURNING id, match_id, sender_id, body, created_at, read_at`,
+      [matchId, userId, trimmedBody]
+    );
+
+    // Update the match's last_message_at timestamp
+    await pool.query(
+      'UPDATE matches SET last_message_at = CURRENT_TIMESTAMP WHERE id = $1',
+      [matchId]
+    );
+
+    const message = messageResult.rows[0];
+    const response: CreateMessageResponse = {
+      message: {
+        id: message.id,
+        matchId: message.match_id,
+        senderId: message.sender_id,
+        body: message.body,
+        createdAt: message.created_at,
+        readAt: message.read_at,
+      },
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    console.error('Send message error:', error);
+    const apiError: ApiError = {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred sending message',
+      },
+    };
+    res.status(500).json(apiError);
+  }
 });
 
 // ============================================

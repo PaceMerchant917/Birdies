@@ -62,6 +62,16 @@ CREATE TABLE IF NOT EXISTS blocks (
   UNIQUE(blocker_id, target_id)
 );
 
+-- Messages table
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  match_id UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  read_at TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
@@ -71,3 +81,5 @@ CREATE INDEX IF NOT EXISTS idx_matches_user_a ON matches(user_a_id);
 CREATE INDEX IF NOT EXISTS idx_matches_user_b ON matches(user_b_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_blocker ON blocks(blocker_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_target ON blocks(target_id);
+CREATE INDEX IF NOT EXISTS idx_messages_match_id ON messages(match_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
