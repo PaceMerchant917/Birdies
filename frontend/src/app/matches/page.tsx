@@ -91,13 +91,16 @@ export default function MatchesPage() {
               href="/discover" 
               style={{
                 display: 'inline-block',
-                marginTop: '24px',
-                padding: '12px 24px',
-                background: '#0070f3',
+                marginTop: '28px',
+                padding: '16px 32px',
+                background: '#000000',
                 color: 'white',
                 textDecoration: 'none',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 fontWeight: '600',
+                fontSize: '16px',
+                letterSpacing: '-0.3px',
+                transition: 'all 0.2s ease'
               }}
             >
               Start Discovering
@@ -162,45 +165,50 @@ export default function MatchesPage() {
         .matches-content {
           flex: 1;
           overflow-y: auto;
-          padding-bottom: 80px;
+          padding: 16px;
         }
 
         .matches-placeholder {
           text-align: center;
-          padding: 60px 20px;
+          padding: 80px 24px;
         }
 
         .placeholder-icon {
-          font-size: 60px;
+          font-size: 64px;
           margin-bottom: 20px;
         }
 
         .matches-list {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
           padding: 0;
         }
 
         .match-item {
           display: flex;
-          align-items: center;
-          padding: 16px 20px;
-          border-bottom: 1px solid #eee;
+          flex-direction: column;
+          background: white;
+          border-radius: 20px;
+          overflow: hidden;
           text-decoration: none;
           color: inherit;
-          transition: background-color 0.2s;
+          transition: all 0.2s ease;
+          border: 0.5px solid #e5e5e7;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
-        .match-item:hover {
-          background-color: #f8f8f8;
+        .match-item:active {
+          transform: scale(0.97);
         }
 
         .match-photo {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
+          width: 100%;
+          aspect-ratio: 1;
           overflow: hidden;
           flex-shrink: 0;
-          margin-right: 16px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #000000 0%, #434343 100%);
+          position: relative;
         }
 
         .match-photo img {
@@ -215,28 +223,35 @@ export default function MatchesPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 30px;
+          font-size: 48px;
         }
 
         .match-info {
-          flex: 1;
+          padding: 12px;
         }
 
         .match-info h3 {
           margin: 0 0 4px 0;
-          font-size: 18px;
-          font-weight: 600;
+          font-size: 17px;
+          font-weight: 700;
+          color: #000000;
+          letter-spacing: -0.3px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .match-meta {
           margin: 0;
-          font-size: 14px;
-          color: #666;
+          font-size: 13px;
+          color: #8e8e93;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .match-arrow {
-          font-size: 20px;
-          color: #999;
+          display: none;
         }
       `}</style>
     </div>

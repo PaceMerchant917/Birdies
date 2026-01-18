@@ -49,13 +49,13 @@ export default function SettingsPage() {
         <section className="settings-section">
           <h3 className="settings-section-title">Account</h3>
           <div className="settings-item">
-            <span>Email</span>
-            <span style={{ color: '#666', fontSize: '14px' }}>{user.email}</span>
+            <span style={{ fontWeight: '500', color: '#000000' }}>Email</span>
+            <span style={{ color: '#8e8e93', fontSize: '14px', fontWeight: '500' }}>{user.email}</span>
           </div>
           <div className="settings-item">
-            <span>Account Status</span>
+            <span style={{ fontWeight: '500', color: '#000000' }}>Account Status</span>
             <span style={{ 
-              color: user.mcgillVerified ? '#2d862d' : '#999',
+              color: user.mcgillVerified ? '#34c759' : '#8e8e93',
               fontSize: '14px',
               fontWeight: '600'
             }}>
@@ -144,30 +144,34 @@ export default function SettingsPage() {
             onClick={handleLogout}
             style={{
               width: '100%',
-              padding: '14px',
-              background: '#0070f3',
+              padding: '16px',
+              background: '#000000',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '16px',
               fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
-              marginBottom: '12px'
+              marginBottom: '12px',
+              letterSpacing: '-0.3px',
+              transition: 'all 0.2s ease'
             }}
           >
-            Logout
+            Sign Out
           </button>
           <button 
             style={{
               width: '100%',
-              padding: '14px',
-              background: '#fee',
-              color: '#c00',
-              border: '1px solid #fcc',
-              borderRadius: '8px',
+              padding: '16px',
+              background: '#ffebee',
+              color: '#c62828',
+              border: '0.5px solid #ef9a9a',
+              borderRadius: '16px',
               fontSize: '16px',
               fontWeight: '600',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              letterSpacing: '-0.3px',
+              transition: 'all 0.2s ease'
             }}
           >
             Delete Account (Coming Soon)

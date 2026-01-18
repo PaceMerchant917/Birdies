@@ -141,23 +141,33 @@ export default function DiscoverPage() {
             {/* Profile Photo */}
             <div className="profile-photo">
               {currentProfile.photos && currentProfile.photos.length > 0 ? (
-                <img 
-                  src={currentProfile.photos[0]} 
-                  alt={currentProfile.displayName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                <>
+                  <img 
+                    src={currentProfile.photos[0]} 
+                    alt={currentProfile.displayName}
+                  />
+                  <div className="profile-gradient"></div>
+                  <div className="profile-counter">
+                    {currentIndex + 1} / {profiles.length}
+                  </div>
+                </>
               ) : (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  fontSize: '80px'
-                }}>
-                  👤
-                </div>
+                <>
+                  <div style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #000000 0%, #434343 100%)',
+                    fontSize: '80px'
+                  }}>
+                    👤
+                  </div>
+                  <div className="profile-counter">
+                    {currentIndex + 1} / {profiles.length}
+                  </div>
+                </>
               )}
             </div>
 
@@ -198,11 +208,6 @@ export default function DiscoverPage() {
               >
                 ♥
               </button>
-            </div>
-
-            {/* Profile Counter */}
-            <div className="profile-counter">
-              {currentIndex + 1} / {profiles.length}
             </div>
           </div>
         )}
@@ -258,126 +263,139 @@ export default function DiscoverPage() {
       <style jsx>{`
         .discover-content {
           flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          overflow: hidden;
+          overflow-y: auto;
+          padding: 0;
         }
 
         .profile-card {
-          width: 100%;
-          max-width: 400px;
-          height: 600px;
           background: white;
-          border-radius: 20px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+          border-radius: 24px;
           overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          position: relative;
+          margin: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          border: 0.5px solid #e5e5e7;
+          transition: all 0.2s ease;
         }
 
         .profile-photo {
           width: 100%;
-          height: 400px;
+          height: 460px;
           background: #f0f0f0;
           position: relative;
+          overflow: hidden;
+        }
+
+        .profile-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .profile-gradient {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 120px;
+          background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+          pointer-events: none;
         }
 
         .profile-info {
-          padding: 20px;
-          flex: 1;
-          overflow-y: auto;
+          padding: 24px;
         }
 
         .profile-info h2 {
-          margin: 0 0 8px 0;
-          font-size: 28px;
-          font-weight: 600;
+          margin: 0 0 6px 0;
+          font-size: 26px;
+          font-weight: 700;
+          color: #000000;
+          letter-spacing: -0.5px;
         }
 
         .profile-meta {
           margin: 4px 0;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .profile-intent {
-          margin: 8px 0;
-          color: #667eea;
-          font-size: 14px;
+          color: #8e8e93;
+          font-size: 15px;
           font-weight: 500;
         }
 
+        .profile-intent {
+          margin: 12px 0 8px;
+          padding: 8px 14px;
+          background: #f2f2f7;
+          border-radius: 12px;
+          color: #000000;
+          font-size: 14px;
+          font-weight: 600;
+          display: inline-block;
+        }
+
         .profile-bio {
-          margin: 12px 0;
-          color: #333;
-          font-size: 15px;
+          margin: 16px 0 0;
+          color: #2c2c2e;
+          font-size: 16px;
           line-height: 1.5;
         }
 
         .profile-actions {
           display: flex;
           justify-content: center;
-          gap: 30px;
-          padding: 20px;
+          gap: 16px;
+          padding: 20px 24px 24px;
           background: white;
-          border-top: 1px solid #eee;
         }
 
         .action-button {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          border: none;
-          font-size: 30px;
+          width: 64px;
+          height: 64px;
+          border-radius: 32px;
+          border: 2px solid #e5e5e7;
+          font-size: 28px;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          background: white;
+        }
+
+        .action-button:active {
+          transform: scale(0.9);
         }
 
         .pass-button {
-          background: #fee;
-          color: #e74c3c;
-        }
-
-        .pass-button:hover {
-          background: #fdd;
-          transform: scale(1.1);
+          color: #ff3b30;
+          border-color: #ff3b30;
         }
 
         .like-button {
-          background: #efe;
-          color: #27ae60;
-        }
-
-        .like-button:hover {
-          background: #dfd;
-          transform: scale(1.1);
+          color: #34c759;
+          border-color: #34c759;
+          font-size: 32px;
         }
 
         .profile-counter {
           position: absolute;
-          top: 10px;
-          right: 10px;
-          background: rgba(0, 0, 0, 0.6);
+          top: 12px;
+          right: 12px;
+          background: rgba(0, 0, 0, 0.5);
           color: white;
           padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 500;
+          border-radius: 16px;
+          font-size: 13px;
+          font-weight: 600;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
         }
 
         .discover-placeholder {
           text-align: center;
-          padding: 40px 20px;
+          padding: 60px 20px;
         }
 
         .placeholder-icon {
-          font-size: 60px;
+          font-size: 64px;
           margin-bottom: 20px;
         }
 
@@ -387,86 +405,96 @@ export default function DiscoverPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(0, 0, 0, 0.75);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 1000;
+          animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .match-modal {
           background: white;
-          border-radius: 20px;
-          padding: 40px;
-          max-width: 400px;
+          border-radius: 24px;
+          padding: 40px 32px;
+          max-width: 360px;
           width: 90%;
           text-align: center;
-          animation: slideUp 0.3s ease-out;
+          animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes slideUp {
           from {
-            transform: translateY(100px);
+            transform: translateY(100px) scale(0.9);
             opacity: 0;
           }
           to {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
             opacity: 1;
           }
         }
 
         .match-icon {
-          font-size: 80px;
-          margin-bottom: 20px;
+          font-size: 72px;
+          margin-bottom: 16px;
         }
 
         .match-modal h2 {
-          font-size: 32px;
-          color: #667eea;
+          font-size: 28px;
+          color: #000000;
           margin-bottom: 12px;
+          font-weight: 700;
+          letter-spacing: -0.5px;
         }
 
         .match-modal p {
           font-size: 16px;
-          color: #666;
-          margin-bottom: 30px;
+          color: #8e8e93;
+          margin-bottom: 28px;
+          line-height: 1.4;
         }
 
         .match-actions {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
         }
 
         .match-button {
-          padding: 14px 24px;
-          border-radius: 10px;
+          padding: 16px 24px;
+          border-radius: 16px;
           font-size: 16px;
           font-weight: 600;
           border: none;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           text-decoration: none;
           display: block;
         }
 
         .match-button.primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000000;
           color: white;
         }
 
-        .match-button.primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .match-button.primary:active {
+          transform: scale(0.98);
+          background: #2c2c2e;
         }
 
         .match-button.secondary {
-          background: #f0f0f0;
-          color: #333;
+          background: #f2f2f7;
+          color: #000000;
         }
 
-        .match-button.secondary:hover {
-          background: #e0e0e0;
+        .match-button.secondary:active {
+          background: #e5e5ea;
+          transform: scale(0.98);
         }
       `}</style>
     </div>

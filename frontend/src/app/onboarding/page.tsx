@@ -125,14 +125,7 @@ export default function OnboardingPage() {
       {/* Form Content */}
       <main className="onboarding-content">
         {error && (
-          <div style={{
-            background: '#fee',
-            color: '#c00',
-            padding: '12px 20px',
-            borderRadius: '8px',
-            marginBottom: '20px',
-            textAlign: 'center',
-          }}>
+          <div className="error-banner">
             {error}
           </div>
         )}
