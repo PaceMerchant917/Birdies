@@ -1,0 +1,65 @@
+version: '3.8'
+
+# NOTE: This docker-compose setup is now OPTIONAL
+# The app uses Supabase as the primary database.
+# This local database is only for testing/development if you want to run fully offline.
+
+services:
+  # Optional: Local Postgres (only if not using Supabase)
+  database:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=mcgill
+      - POSTGRES_PASSWORD=dating123
+      - POSTGRES_DB=mcgill_dating
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcgill"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - local-db  # Only starts with: docker-compose --profile local-db up
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - API_PORT=3001
+      - NODE_ENV=development
+      # Use your Supabase DATABASE_URL from .env, or local fallback
+      - DATABASE_URL=${DATABASE_URL:-postgresql://mcgill:dating123@database:5432/mcgill_dating}
+      - JWT_SECRET=${JWT_SECRET:-fallback-secret}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+    # Only depends on database if using local-db profile
+    # depends_on:
+    #   database:
+    #     condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
