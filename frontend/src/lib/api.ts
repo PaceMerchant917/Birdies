@@ -101,8 +101,21 @@ export interface SignupResponse {
   message: string;
 }
 
+export interface CompleteSignupRequest {
+  email: string;
+  password: string;
+  code: string;
+}
+
 export async function signup(data: SignupRequest): Promise<SignupResponse> {
   return apiRequest<SignupResponse>('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function completeSignup(data: CompleteSignupRequest): Promise<SignupResponse> {
+  return apiRequest<SignupResponse>('/auth/complete-signup', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -137,6 +150,41 @@ export interface LogoutResponse {
 export async function logout(): Promise<LogoutResponse> {
   return apiRequest<LogoutResponse>('/auth/logout', {
     method: 'POST',
+  });
+}
+
+// ============================================
+// OTP VERIFICATION ENDPOINTS
+// ============================================
+
+export interface SendCodeRequest {
+  email: string;
+}
+
+export interface SendCodeResponse {
+  ok: boolean;
+}
+
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyCodeResponse {
+  ok: boolean;
+}
+
+export async function sendOTPCode(data: SendCodeRequest): Promise<SendCodeResponse> {
+  return apiRequest<SendCodeResponse>('/auth/send-code', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function verifyOTPCode(data: VerifyCodeRequest): Promise<VerifyCodeResponse> {
+  return apiRequest<VerifyCodeResponse>('/auth/verify-code', {
+    method: 'POST',
+    body: JSON.stringify(data),
   });
 }
 

@@ -90,6 +90,12 @@ export interface SignupResponse {
   message: string;
 }
 
+export interface CompleteSignupRequest {
+  email: string;
+  password: string;
+  code: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -98,6 +104,24 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string;
   user: User;
+}
+
+// OTP Verification
+export interface SendCodeRequest {
+  email: string;
+}
+
+export interface SendCodeResponse {
+  ok: boolean;
+}
+
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyCodeResponse {
+  ok: boolean;
 }
 
 // User/Profile

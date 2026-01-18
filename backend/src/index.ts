@@ -8,6 +8,8 @@ import {
   generateToken,
 } from './auth/helpers';
 import { requireAuth, type AuthRequest } from './auth/middleware';
+import { generateOTPCode, storeOTP, verifyOTP } from './auth/otp';
+import { sendOTPEmail } from './auth/email';
 import type {
   ApiError,
   HealthResponse,
@@ -15,6 +17,10 @@ import type {
   SignupResponse,
   LoginRequest,
   LoginResponse,
+  SendCodeRequest,
+  SendCodeResponse,
+  VerifyCodeRequest,
+  VerifyCodeResponse,
   GetMeResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
@@ -70,7 +76,7 @@ app.post('/api/auth/signup', async (req, res) => {
   try {
     const body: SignupRequest = req.body;
     const { email, password } = body;
-    
+
     console.log(`\n🔵 Signup request received for: ${email}`);
 
     // Validate email domain (must be @mail.mcgill.ca)
@@ -100,10 +106,123 @@ app.post('/api/auth/signup', async (req, res) => {
       return res.status(409).json(error);
     }
 
-    // Hash password
+    // Generate OTP code and send email
+    const otpCode = generateOTPCode();
+    storeOTP(email, otpCode, 10); // 10 minute expiry
+
+    try {
+      await sendOTPEmail(email, otpCode);
+      console.log(`✅ OTP sent to ${email} for signup verification`);
+    } catch (emailError) {
+      console.error('❌ Failed to send OTP email:', emailError);
+      // Still return success to avoid leaking email existence
+    }
+
+    // Return response indicating OTP was sent
+    const response: SignupResponse = {
+      userId: '', // Empty for now, will be set after verification
+      message: `Verification code sent to ${email}. Please check your email.`,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Signup error:', error);
+    const apiError: ApiError = {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred during signup',
+      },
+    };
+    res.status(500).json(apiError);
+  }
+});
+
+/**
+ * POST /api/auth/complete-signup
+ * Complete signup with OTP verification and create account
+ */
+app.post('/api/auth/complete-signup', async (req, res) => {
+  try {
+    const body = req.body as { email: string; password: string; code: string };
+    const { email, password, code } = body;
+
+    console.log(`\n🔵 Complete signup request for: ${email}`);
+
+    // Validate inputs
+    if (!email || !password || !code) {
+      const error: ApiError = {
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'Email, password, and verification code are required',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Validate email domain
+    if (!email.endsWith('@mail.mcgill.ca')) {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_EMAIL_DOMAIN',
+          message: 'Invalid email domain (must be @mail.mcgill.ca)',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Verify OTP code
+    const verification = verifyOTP(email, code);
+    if (!verification.valid) {
+      let errorCode = 'INVALID_CODE';
+      let errorMessage = 'Invalid or expired verification code';
+
+      switch (verification.reason) {
+        case 'max_attempts':
+          errorCode = 'MAX_ATTEMPTS_EXCEEDED';
+          errorMessage = 'Maximum verification attempts exceeded. Please request a new code.';
+          break;
+        case 'expired':
+          errorCode = 'CODE_EXPIRED';
+          errorMessage = 'Verification code has expired. Please request a new code.';
+          break;
+        case 'not_found':
+          errorCode = 'CODE_NOT_FOUND';
+          errorMessage = 'No verification code found. Please start signup again.';
+          break;
+        case 'invalid_code':
+          errorCode = 'INVALID_CODE';
+          errorMessage = 'Invalid verification code. Please try again.';
+          break;
+      }
+
+      const error: ApiError = {
+        error: {
+          code: errorCode,
+          message: errorMessage,
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Check if email already exists (double check)
+    const existingUser = await pool.query(
+      'SELECT id FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      const error: ApiError = {
+        error: {
+          code: 'EMAIL_ALREADY_REGISTERED',
+          message: 'Email already registered',
+        },
+      };
+      return res.status(409).json(error);
+    }
+
+    // Hash password and create account
     const passwordHash = await hashPassword(password);
 
-    // Create user with mcgill_verified set to TRUE (no email verification needed)
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, mcgill_verified)
        VALUES ($1, $2, TRUE)
@@ -112,10 +231,9 @@ app.post('/api/auth/signup', async (req, res) => {
     );
 
     const userId = result.rows[0].id;
+    console.log(`✅ User account created successfully: ${email} (ID: ${userId})`);
 
-    console.log(`✅ User created successfully: ${email} (ID: ${userId})`);
-
-    // Return response matching CONTRACTS.md exactly
+    // Return success response
     const response: SignupResponse = {
       userId: userId,
       message: `Account created successfully for ${email}`,
@@ -123,11 +241,11 @@ app.post('/api/auth/signup', async (req, res) => {
 
     res.status(201).json(response);
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Complete signup error:', error);
     const apiError: ApiError = {
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'An error occurred during signup',
+        message: 'An error occurred completing signup',
       },
     };
     res.status(500).json(apiError);
@@ -202,6 +320,184 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/logout', (req, res) => {
   // TODO: Implement logout logic
   notImplemented(res);
+});
+
+// ============================================
+// OTP VERIFICATION ENDPOINTS
+// ============================================
+
+/**
+ * POST /api/auth/send-code
+ * Send a 4-digit OTP code to the user's email
+ */
+app.post('/api/auth/send-code', async (req, res) => {
+  try {
+    const body: SendCodeRequest = req.body;
+    const { email } = body;
+
+    // Validate email format
+    if (!email || typeof email !== 'string') {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_EMAIL',
+          message: 'Email is required and must be a string',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Optional: Validate email domain (remove if not needed)
+    // if (!email.endsWith('@mail.mcgill.ca')) {
+    //   const error: ApiError = {
+    //     error: {
+    //       code: 'INVALID_EMAIL_DOMAIN',
+    //       message: 'Invalid email domain',
+    //     },
+    //   };
+    //   return res.status(400).json(error);
+    // }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_EMAIL_FORMAT',
+          message: 'Invalid email format',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Generate 4-digit code
+    const code = generateOTPCode();
+
+    // Store code in memory (10 minute expiry)
+    storeOTP(email, code, 10);
+
+    // Send email via Resend
+    try {
+      await sendOTPEmail(email, code);
+    } catch (emailError) {
+      console.error('Failed to send OTP email:', emailError);
+      // Still return success to avoid leaking email existence
+      // In production, you might want to handle this differently
+    }
+
+    // Return success (don't leak whether email exists or not)
+    const response: SendCodeResponse = { ok: true };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Send code error:', error);
+    const apiError: ApiError = {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while sending verification code',
+      },
+    };
+    res.status(500).json(apiError);
+  }
+});
+
+/**
+ * POST /api/auth/verify-code
+ * Verify the OTP code sent to the user's email
+ */
+app.post('/api/auth/verify-code', async (req, res) => {
+  try {
+    const body: VerifyCodeRequest = req.body;
+    const { email, code } = body;
+
+    // Validate inputs
+    if (!email || typeof email !== 'string') {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_EMAIL',
+          message: 'Email is required and must be a string',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    if (!code || typeof code !== 'string') {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_CODE',
+          message: 'Code is required and must be a string',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Validate code format (exactly 4 digits)
+    const codeRegex = /^\d{4}$/;
+    if (!codeRegex.test(code)) {
+      const error: ApiError = {
+        error: {
+          code: 'INVALID_CODE_FORMAT',
+          message: 'Code must be exactly 4 digits',
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Verify the code
+    const verification = verifyOTP(email, code);
+
+    if (!verification.valid) {
+      let errorCode = 'INVALID_CODE';
+      let errorMessage = 'Invalid or expired verification code';
+
+      switch (verification.reason) {
+        case 'max_attempts':
+          errorCode = 'MAX_ATTEMPTS_EXCEEDED';
+          errorMessage =
+            'Maximum verification attempts exceeded. Please request a new code.';
+          break;
+        case 'expired':
+          errorCode = 'CODE_EXPIRED';
+          errorMessage = 'Verification code has expired. Please request a new code.';
+          break;
+        case 'not_found':
+          errorCode = 'CODE_NOT_FOUND';
+          errorMessage =
+            'No verification code found for this email. Please request a new code.';
+          break;
+        case 'invalid_code':
+          errorCode = 'INVALID_CODE';
+          errorMessage = 'Invalid verification code. Please try again.';
+          break;
+      }
+
+      const error: ApiError = {
+        error: {
+          code: errorCode,
+          message: errorMessage,
+        },
+      };
+      return res.status(400).json(error);
+    }
+
+    // Code is valid
+    // Optional: Update user verification status in database here
+    // Example:
+    // await pool.query(
+    //   'UPDATE users SET email_verified = TRUE WHERE email = $1',
+    //   [email]
+    // );
+
+    const response: VerifyCodeResponse = { ok: true };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Verify code error:', error);
+    const apiError: ApiError = {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An error occurred while verifying code',
+      },
+    };
+    res.status(500).json(apiError);
+  }
 });
 
 // ============================================
