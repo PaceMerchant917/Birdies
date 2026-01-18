@@ -56,9 +56,7 @@ export default function MatchesPage() {
     <div className="mobile-container matches-page">
       {/* Header */}
       <header className="page-header">
-        <Link href="/home" className="back-button">
-          ← Home
-        </Link>
+        <div style={{ width: '40px' }}></div>
         <h1>Matches</h1>
         <div style={{ width: '40px' }}></div>
       </header>
@@ -140,10 +138,6 @@ export default function MatchesPage() {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <Link href="/home" className="nav-item">
-          <span className="nav-icon">🏠</span>
-          <span className="nav-label">Home</span>
-        </Link>
         <Link href="/discover" className="nav-item">
           <span className="nav-icon">🔍</span>
           <span className="nav-label">Discover</span>

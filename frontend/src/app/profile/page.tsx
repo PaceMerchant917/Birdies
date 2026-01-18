@@ -274,9 +274,7 @@ export default function ProfilePage() {
     <div className="mobile-container profile-page">
       {/* Header */}
       <header className="page-header">
-        <Link href="/home" className="back-button">
-          ← Home
-        </Link>
+        <div style={{ width: '40px' }}></div>
         <h1>Profile</h1>
         <Link href="/settings" className="settings-button">
           ⚙️
@@ -555,10 +553,6 @@ export default function ProfilePage() {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <Link href="/home" className="nav-item">
-          <span className="nav-icon">🏠</span>
-          <span className="nav-label">Home</span>
-        </Link>
         <Link href="/discover" className="nav-item">
           <span className="nav-icon">🔍</span>
           <span className="nav-label">Discover</span>

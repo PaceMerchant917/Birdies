@@ -31,7 +31,7 @@ export default function DiscoverPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getDiscoverFeed(10);
+      const response = await getDiscoverFeed(100);
       setProfiles(response.profiles);
       setCurrentIndex(0);
     } catch (err) {
@@ -101,9 +101,7 @@ export default function DiscoverPage() {
     <div className="mobile-container discover-page">
       {/* Header */}
       <header className="discover-header">
-        <Link href="/home" className="back-button">
-          ← Home
-        </Link>
+        <div style={{ width: '40px' }}></div>
         <h1>Discover</h1>
         <Link href="/settings" className="settings-button">
           ⚙️
@@ -200,10 +198,6 @@ export default function DiscoverPage() {
               </button>
             </div>
 
-            {/* Profile Counter */}
-            <div className="profile-counter">
-              {currentIndex + 1} / {profiles.length}
-            </div>
           </div>
         )}
       </main>
@@ -237,10 +231,6 @@ export default function DiscoverPage() {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <Link href="/home" className="nav-item">
-          <span className="nav-icon">🏠</span>
-          <span className="nav-label">Home</span>
-        </Link>
         <Link href="/discover" className="nav-item active">
           <span className="nav-icon">🔍</span>
           <span className="nav-label">Discover</span>

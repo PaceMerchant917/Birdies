@@ -11,7 +11,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/home');
+      router.push('/discover');
     }
   }, [isAuthenticated, isLoading, router]);
 

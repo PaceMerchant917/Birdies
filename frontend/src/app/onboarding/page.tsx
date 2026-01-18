@@ -115,9 +115,7 @@ export default function OnboardingPage() {
     <div className="mobile-container onboarding-page">
       {/* Header */}
       <header className="page-header">
-        <Link href="/home" className="back-button">
-          ← Back
-        </Link>
+        <div style={{ width: '40px' }}></div>
         <h1>Create Profile</h1>
         <div style={{ width: '40px' }}></div>
       </header>

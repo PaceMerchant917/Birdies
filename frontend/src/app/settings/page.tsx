@@ -36,8 +36,8 @@ export default function SettingsPage() {
     <div className="mobile-container settings-page">
       {/* Header */}
       <header className="page-header">
-        <Link href="/home" className="back-button">
-          ← Home
+        <Link href="/discover" className="back-button">
+          ← Discover
         </Link>
         <h1>Settings</h1>
         <div style={{ width: '40px' }}></div>
@@ -177,10 +177,6 @@ export default function SettingsPage() {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <Link href="/home" className="nav-item">
-          <span className="nav-icon">🏠</span>
-          <span className="nav-label">Home</span>
-        </Link>
         <Link href="/discover" className="nav-item">
           <span className="nav-icon">🔍</span>
           <span className="nav-label">Discover</span>
