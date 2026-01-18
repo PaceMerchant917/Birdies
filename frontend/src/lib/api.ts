@@ -221,3 +221,78 @@ export async function updateProfile(data: UpdateProfileRequest): Promise<UpdateP
     body: JSON.stringify(data),
   });
 }
+
+// ============================================
+// LIKES/MATCHES ENDPOINTS
+// ============================================
+
+export interface CreateLikeRequest {
+  targetUserId: string;
+}
+
+export interface CreateLikeResponse {
+  matched: boolean;
+  matchId?: string;
+}
+
+export async function createLike(targetUserId: string): Promise<CreateLikeResponse> {
+  return apiRequest<CreateLikeResponse>('/likes', {
+    method: 'POST',
+    body: JSON.stringify({ targetUserId }),
+  });
+}
+
+export interface Match {
+  id: string;
+  userAId: string;
+  userBId: string;
+  createdAt: string;
+  lastMessageAt?: string;
+}
+
+export interface GetMatchesResponse {
+  matches: Array<{
+    match: Match;
+    profile: Profile;
+  }>;
+}
+
+export async function getMatches(): Promise<GetMatchesResponse> {
+  return apiRequest<GetMatchesResponse>('/matches', {
+    method: 'GET',
+  });
+}
+
+// ============================================
+// MESSAGING ENDPOINTS
+// ============================================
+
+export interface Message {
+  id: string;
+  matchId: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+  readAt?: string;
+}
+
+export interface GetMessagesResponse {
+  messages: Message[];
+}
+
+export async function getMessages(matchId: string): Promise<GetMessagesResponse> {
+  return apiRequest<GetMessagesResponse>(`/matches/${matchId}/messages`, {
+    method: 'GET',
+  });
+}
+
+export interface CreateMessageResponse {
+  message: Message;
+}
+
+export async function sendMessage(matchId: string, body: string): Promise<CreateMessageResponse> {
+  return apiRequest<CreateMessageResponse>(`/matches/${matchId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  });
+}

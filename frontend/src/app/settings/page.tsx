@@ -94,6 +94,49 @@ export default function SettingsPage() {
           </button>
         </section>
 
+        {/* Developer Section - Only show in development */}
+        {process.env.NEXT_PUBLIC_ENV !== 'production' && (
+          <section className="settings-section" style={{ 
+            background: '#fff9e6', 
+            border: '2px solid #ffd700',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '20px'
+          }}>
+            <h3 className="settings-section-title" style={{ color: '#c28200' }}>
+              🛠️ Developer Tools
+            </h3>
+            <div style={{ 
+              background: 'white',
+              padding: '16px',
+              borderRadius: '8px',
+              marginTop: '12px'
+            }}>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }}>
+                Seed Demo Data
+              </h4>
+              <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#666', lineHeight: '1.5' }}>
+                Generate sample profiles, likes, matches, and messages for testing:
+              </p>
+              <pre style={{
+                background: '#f4f4f4',
+                padding: '12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                overflow: 'auto',
+                margin: '0 0 8px 0',
+                fontFamily: 'monospace'
+              }}>
+                cd backend{'\n'}TARGET_EMAIL={user?.email || 'your.email@mail.mcgill.ca'} npm run seed-dev
+              </pre>
+              <p style={{ margin: '0', fontSize: '12px', color: '#888', lineHeight: '1.4' }}>
+                This will create ~80 sample profiles, 20 likes to your account, 10 matches with messages.
+                Safe to re-run (idempotent).
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Actions Section */}
         <section className="settings-section">
           <h3 className="settings-section-title">Actions</h3>

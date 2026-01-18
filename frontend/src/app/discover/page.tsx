@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
-import { getDiscoverFeed, type Profile, type ApiError } from '../../lib/api';
+import { getDiscoverFeed, createLike, type Profile, type ApiError } from '../../lib/api';
 
 export default function DiscoverPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function DiscoverPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [matchModal, setMatchModal] = useState<{ show: boolean; matchId?: string }>({ show: false });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -42,15 +43,29 @@ export default function DiscoverPage() {
     }
   };
 
-  const handleLike = () => {
-    // TODO: Implement like functionality
-    console.log('Liked profile:', profiles[currentIndex]?.userId);
-    nextProfile();
+  const handleLike = async () => {
+    const currentProfile = profiles[currentIndex];
+    if (!currentProfile) return;
+
+    try {
+      const response = await createLike(currentProfile.userId);
+      
+      if (response.matched && response.matchId) {
+        // It's a match! Show modal
+        setMatchModal({ show: true, matchId: response.matchId });
+      } else {
+        // Just a like, move to next profile
+        nextProfile();
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      console.error('Error creating like:', apiError.error?.message);
+      // Still advance to next profile
+      nextProfile();
+    }
   };
 
   const handlePass = () => {
-    // TODO: Implement pass functionality
-    console.log('Passed profile:', profiles[currentIndex]?.userId);
     nextProfile();
   };
 
@@ -61,6 +76,11 @@ export default function DiscoverPage() {
       // No more profiles, could load more here
       setProfiles([]);
     }
+  };
+
+  const closeMatchModal = () => {
+    setMatchModal({ show: false });
+    nextProfile();
   };
 
   if (isLoading) {
@@ -187,6 +207,33 @@ export default function DiscoverPage() {
           </div>
         )}
       </main>
+
+      {/* Match Modal */}
+      {matchModal.show && (
+        <div className="match-modal-overlay" onClick={closeMatchModal}>
+          <div className="match-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="match-modal-content">
+              <div className="match-icon">🎉</div>
+              <h2>It's a Match!</h2>
+              <p>You and {profiles[currentIndex]?.displayName} liked each other!</p>
+              <div className="match-actions">
+                <Link 
+                  href={`/chat/${matchModal.matchId}`}
+                  className="match-button primary"
+                >
+                  Send Message
+                </Link>
+                <button 
+                  onClick={closeMatchModal}
+                  className="match-button secondary"
+                >
+                  Keep Swiping
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
@@ -332,6 +379,94 @@ export default function DiscoverPage() {
         .placeholder-icon {
           font-size: 60px;
           margin-bottom: 20px;
+        }
+
+        .match-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .match-modal {
+          background: white;
+          border-radius: 20px;
+          padding: 40px;
+          max-width: 400px;
+          width: 90%;
+          text-align: center;
+          animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .match-icon {
+          font-size: 80px;
+          margin-bottom: 20px;
+        }
+
+        .match-modal h2 {
+          font-size: 32px;
+          color: #667eea;
+          margin-bottom: 12px;
+        }
+
+        .match-modal p {
+          font-size: 16px;
+          color: #666;
+          margin-bottom: 30px;
+        }
+
+        .match-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .match-button {
+          padding: 14px 24px;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-decoration: none;
+          display: block;
+        }
+
+        .match-button.primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+
+        .match-button.primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .match-button.secondary {
+          background: #f0f0f0;
+          color: #333;
+        }
+
+        .match-button.secondary:hover {
+          background: #e0e0e0;
         }
       `}</style>
     </div>

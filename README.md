@@ -45,7 +45,9 @@ npm run dev:backend
 
 The app uses a centralized Supabase Postgres database shared by all developers.
 
-**For detailed setup instructions, see `SETUP_INSTRUCTIONS.md`**
+**📚 Setup Guides:**
+- **New team members:** See `TEAM_SETUP.md` for shared database setup
+- **Detailed instructions:** See `SETUP_INSTRUCTIONS.md` for full configuration
 
 Quick setup:
 
