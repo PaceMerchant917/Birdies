@@ -103,9 +103,7 @@ export default function DiscoverPage() {
       <header className="discover-header">
         <div style={{ width: '40px' }}></div>
         <h1>Discover</h1>
-        <Link href="/settings" className="settings-button">
-          ⚙️
-        </Link>
+        <div style={{ width: '40px' }}></div>
       </header>
 
       {/* Main Discover Area */}
@@ -136,20 +134,20 @@ export default function DiscoverPage() {
           </div>
         ) : (
           <div className="profile-card">
-            {/* Profile Photo */}
-            <div className="profile-photo">
+            {/* Profile Photo Section with Name Overlay */}
+            <div className="profile-photo-section">
               {currentProfile.photos && currentProfile.photos.length > 0 ? (
-                <img 
-                  src={currentProfile.photos[0]} 
+                <img
+                  src={currentProfile.photos[0]}
                   alt={currentProfile.displayName}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   fontSize: '80px'
@@ -157,27 +155,48 @@ export default function DiscoverPage() {
                   👤
                 </div>
               )}
+              <div className="profile-name-overlay">
+                <h2>{currentProfile.displayName}</h2>
+              </div>
             </div>
 
-            {/* Profile Info */}
-            <div className="profile-info">
-              <h2>{currentProfile.displayName}</h2>
-              {currentProfile.faculty && currentProfile.year && (
-                <p className="profile-meta">
-                  {currentProfile.faculty} • Class of {currentProfile.year}
-                </p>
-              )}
-              {currentProfile.pronouns && (
-                <p className="profile-meta">{currentProfile.pronouns}</p>
-              )}
-              {currentProfile.intent && (
-                <p className="profile-intent">
-                  Looking for: {currentProfile.intent}
-                </p>
-              )}
-              {currentProfile.bio && (
-                <p className="profile-bio">{currentProfile.bio}</p>
-              )}
+            {/* Profile Details Section */}
+            <div className="profile-details-section">
+              <div className="profile-details-top">
+                {currentProfile.faculty && currentProfile.year && (
+                  <div className="profile-details-row">
+                    <span className="profile-details-label">🎓</span>
+                    <span className="profile-details-value">{currentProfile.faculty} • Class of {currentProfile.year}</span>
+                  </div>
+                )}
+
+                {currentProfile.pronouns && (
+                  <div className="profile-details-row">
+                    <span className="profile-details-label">🏳️‍🌈</span>
+                    <span className="profile-details-value">{currentProfile.pronouns}</span>
+                  </div>
+                )}
+
+                {currentProfile.intent && (
+                  <div className="profile-details-row">
+                    <span className="profile-details-label">💕</span>
+                    <span className="profile-details-value">Looking for {currentProfile.intent}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="profile-details-divider"></div>
+
+              <div className="profile-bio-section">
+                <div className="profile-bio-label">About me</div>
+                {currentProfile.bio ? (
+                  <div className="profile-bio-text">{currentProfile.bio}</div>
+                ) : (
+                  <div className="profile-bio-text" style={{ color: '#999', fontStyle: 'italic' }}>
+                    No bio yet...
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -258,7 +277,7 @@ export default function DiscoverPage() {
         .profile-card {
           width: 100%;
           max-width: 400px;
-          height: 600px;
+          height: 720px;
           background: white;
           border-radius: 20px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
@@ -268,43 +287,89 @@ export default function DiscoverPage() {
           position: relative;
         }
 
-        .profile-photo {
+        .profile-photo-section {
           width: 100%;
-          height: 400px;
+          height: 480px;
           background: #f0f0f0;
           position: relative;
+          display: flex;
+          align-items: flex-end;
         }
 
-        .profile-info {
-          padding: 20px;
+        .profile-name-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+          padding: 40px 20px 20px 20px;
+          color: white;
+        }
+
+        .profile-name-overlay h2 {
+          margin: 0;
+          font-size: 32px;
+          font-weight: 700;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-details-section {
+          padding: 24px 20px;
           flex: 1;
-          overflow-y: auto;
+          background: #fafafa;
+          display: flex;
+          flex-direction: column;
         }
 
-        .profile-info h2 {
-          margin: 0 0 8px 0;
-          font-size: 28px;
+        .profile-details-top {
+          flex: 0 0 auto;
+          margin-bottom: 16px;
+        }
+
+        .profile-details-row {
+          display: flex;
+          align-items: center;
+          margin-bottom: 8px;
+          font-size: 14px;
+          color: #555;
+        }
+
+        .profile-details-label {
           font-weight: 600;
+          margin-right: 8px;
+          color: #333;
         }
 
-        .profile-meta {
-          margin: 4px 0;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .profile-intent {
-          margin: 8px 0;
+        .profile-details-value {
           color: #667eea;
-          font-size: 14px;
           font-weight: 500;
         }
 
-        .profile-bio {
-          margin: 12px 0;
+        .profile-details-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #ddd, transparent);
+          margin: 16px 0;
+        }
+
+        .profile-bio-section {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .profile-bio-label {
+          font-size: 14px;
+          font-weight: 600;
           color: #333;
+          margin-bottom: 8px;
+        }
+
+        .profile-bio-text {
+          color: #555;
           font-size: 15px;
           line-height: 1.5;
+          flex: 1;
+          overflow-y: auto;
         }
 
         .profile-actions {
